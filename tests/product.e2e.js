@@ -60,7 +60,8 @@ test("experiência móvel sem rolagem horizontal",async({page},testInfo)=>{
   await page.goto("/");
   await expect(page.getByRole("heading",{name:/Transforme números em conhecimento/i})).toBeVisible();
   await page.getByRole("button",{name:/Testar demonstração/i}).click();
-  const widths=await page.evaluate(()=>({doc:document.documentElement.scrollWidth,viewport:window.innerWidth}));
+  const widths=await page.evaluate(()=>({doc:document.documentElement.scrollWidth,viewport:window.innerWidth,overflow:[...document.querySelectorAll("*")].filter(e=>e.getBoundingClientRect().right>window.innerWidth+1).slice(0,12).map(e=>({tag:e.tagName,cl:e.className,right:Math.round(e.getBoundingClientRect().right)}))}));
+  console.log("Mobile viewport diagnostic:",JSON.stringify(widths));
   expect(widths.doc).toBeLessThanOrEqual(widths.viewport+1);
   await page.screenshot({path:testInfo.outputPath("homepage-mobile.png"),fullPage:true});
 });
