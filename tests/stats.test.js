@@ -1,0 +1,4 @@
+import test from "node:test";import assert from "node:assert/strict";import {choose,probability,simulate,summarize} from "../src/stats.js";import {parseHistory} from "../src/parser.js";
+test("probabilidades matemáticas",()=>{assert.equal(choose(60,6),50063860);assert.ok(Math.abs(Array.from({length:7},(_,i)=>probability(i)).reduce((a,b)=>a+b,0)-1)<1e-10)});
+test("simulações reproduzíveis",()=>{const r=simulate(10000,42);assert.deepEqual(r,simulate(10000,42));assert.equal(r.counts.reduce((a,b)=>a+b),10000);assert.ok(Math.abs(r.mean-.6)<.06)});
+test("parser importa linhas válidas e rejeita duplicatas",()=>{const p=parseHistory("concurso;data;bola1;bola2;bola3;bola4;bola5;bola6\n1;11/03/1996;4;5;30;33;41;52\n2;18/03/1996;10;11;12;13;14;15\n1;18/03/1996;1;2;3;4;5;6");assert.equal(p.records.length,2);assert.deepEqual(p.errors,[4]);assert.equal(summarize(p.records).count,2)});
