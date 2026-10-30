@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0c1221">
+  <meta name="description" content="Loteria Lab: visualizações interativas para explorar estatísticas, história e probabilidade da Mega-Sena com transparência.">
+  <title>Loteria Lab — Entenda os números</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./src/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Ir para o conteúdo</a>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Navegação principal">
+      <a class="brand" href="#inicio" aria-label="Loteria Lab, início">
+        <span class="brand-icon" aria-hidden="true">✦</span>
+        <span><strong>LOTERIA<span class="brand-accent">LAB</span></strong><small>INTELIGÊNCIA ESTATÍSTICA</small></span>
+      </a>
+      <div class="sidebar-section">EXPLORAR</div>
+      <nav class="side-nav" aria-label="Seções">
+        <a class="nav-link active" href="#inicio"><span aria-hidden="true">◫</span> Visão geral</a>
+        <a class="nav-link" href="#frequencias"><span aria-hidden="true">▦</span> Mapa das dezenas</a>
+        <a class="nav-link" href="#distribuicoes"><span aria-hidden="true">◧</span> Distribuições</a>
+        <a class="nav-link" href="#laboratorio"><span aria-hidden="true">◇</span> Laboratório</a>
+        <a class="nav-link" href="#dados"><span aria-hidden="true">⇧</span> Importar histórico</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="sidebar-note"><span class="status-dot"></span> Privacidade por design<br><small>Seus arquivos ficam no navegador.</small></div>
+        <small class="sidebar-version">v0.1 · Versão educacional</small>
+      </div>
+    </aside>
+
+    <main id="main">
+      <header class="topbar" id="inicio">
+        <span class="topbar-label"><span class="live-dot"></span> LABORATÓRIO DE DADOS</span>
+        <div class="topbar-right"><span id="data-pill" class="data-pill">Aguardando dados</span><a href="#dados" class="topbar-action">Importar CSV <span aria-hidden="true">↗</span></a></div>
+      </header>
+
+      <div class="content">
+        <section class="hero" aria-labelledby="hero-heading">
+          <div class="hero-copy">
+            <span class="eyebrow"><span class="sparkle">✧</span> A CIÊNCIA POR TRÁS DOS NÚMEROS</span>
+            <h1 id="hero-heading">Transforme números em <span>conhecimento.</span></h1>
+            <p>Explore o histórico da Mega-Sena, descubra padrões estatísticos e entenda o papel do acaso — com uma experiência visual, transparente e interativa.</p>
+            <div class="hero-actions"><a class="btn btn-primary" href="#dados">Explorar meu histórico <span aria-hidden="true">↗</span></a><button class="btn btn-ghost" type="button" id="demo-btn">Testar demonstração <span aria-hidden="true">▶</span></button></div>
+            <div class="hero-fineprint">Dados de demonstração são simulados e sempre identificados.</div>
+          </div>
+          <div class="hero-visual" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><div class="orb-number n1">07</div><div class="orb-number n2">23</div><div class="orb-number n3">41</div><div class="orb-number n4">58</div><div class="hero-center"><span>60</span><small>DEZENAS</small></div><div class="star s1">✦</div><div class="star s2">✧</div></div>
+        </section>
+
+        <section class="benefit-grid" aria-label="Benefícios do Loteria Lab">
+          <article class="benefit"><span class="benefit-icon purple">▤</span><div><h3>Dados sob controle</h3><p>Importe e explore o histórico, com checagem de consistência.</p></div></article>
+          <article class="benefit"><span class="benefit-icon blue">▦</span><div><h3>Insights visuais</h3><p>Frequências, distribuições e contexto estatístico em um só lugar.</p></div></article>
+          <article class="benefit"><span class="benefit-icon green">◈</span><div><h3>Simulações claras</h3><p>Compare resultados com modelos aleatórios reproduzíveis.</p></div></article>
+          <article class="benefit"><span class="benefit-icon amber">◎</span><div><h3>Privacidade local</h3><p>Dados processados no seu dispositivo, sem cadastro.</p></div></article>
+        </section>
+
+        <div class="section-heading"><div><span class="eyebrow">SEU PAINEL</span><h2>Visão geral</h2><p id="dataset-description">Importe um CSV ou abra a demonstração para começar.</p></div><span class="section-tag" id="source-tag">SEM DADOS</span></div>
+        <section class="kpi-grid" aria-label="Indicadores principais">
+          <article class="kpi"><span class="kpi-title">Concursos analisados <span>↗</span></span><strong id="kpi-draws">—</strong><small>Registros válidos e únicos</small></article>
+          <article class="kpi"><span class="kpi-title">Participações por dezena <span>▥</span></span><strong id="kpi-expected">—</strong><small>Esperado no modelo uniforme</small></article>
+          <article class="kpi"><span class="kpi-title">Soma média <span>≈</span></span><strong id="kpi-sum">—</strong><small>Por conjunto de seis dezenas</small></article>
+          <article class="kpi"><span class="kpi-title">Último registro <span>◷</span></span><strong id="kpi-latest">—</strong><small>Maior número de concurso</small></article>
+        </section>
+
+        <section class="panel" id="frequencias" aria-labelledby="freq-title">
+          <div class="panel-head"><div><span class="eyebrow">ANÁLISE DE FREQUÊNCIA</span><h2 id="freq-title">Mapa das 60 dezenas</h2><p>Observe variações em relação ao valor esperado. Cor não indica capacidade de previsão.</p></div><div class="field"><label for="window-select">Janela de análise</label><select id="window-select"><option value="all">Todo o histórico</option><option value="100">Últimos 100</option><option value="50">Últimos 50</option><option value="25">Últimos 25</option></select></div></div>
+          <div class="heatmap-legend"><span><i class="legend-swatch below"></i> Abaixo do esperado</span><span><i class="legend-swatch typical"></i> Próximo ao esperado</span><span><i class="legend-swatch above"></i> Acima do esperado</span></div>
+          <div class="heatmap" id="number-grid" aria-label="Frequência de cada dezena"><p class="empty">Carregue dados para visualizar o mapa.</p></div>
+          <div class="number-insight" id="number-insight" aria-live="polite">Selecione uma dezena no mapa para ver o detalhamento.</div>
+        </section>
+
+        <section class="panel" id="distribuicoes" aria-labelledby="dist-title">
+          <div class="panel-head"><div><span class="eyebrow">ESTRUTURA DOS RESULTADOS</span><h2 id="dist-title">Distribuições históricas</h2><p>Explore formatos e variações dos conjuntos já observados.</p></div></div>
+          <div class="dist-grid"><article class="inner-panel"><h3>Quantidade de dezenas pares</h3><p>De zero a seis por concurso</p><div class="bar-chart" id="parity-chart"></div></article><article class="inner-panel"><h3>Soma das seis dezenas</h3><p>Distribuição por faixas de soma</p><div class="bar-chart" id="sum-chart"></div></article></div>
+        </section>
+
+        <section class="panel" id="laboratorio" aria-labelledby="lab-title">
+          <div class="panel-head"><div><span class="eyebrow">EXPERIMENTO REPRODUZÍVEL</span><h2 id="lab-title">Laboratório do acaso</h2><p>Veja a distribuição de coincidências entre dois conjuntos aleatórios independentes de seis números entre 1 e 60.</p></div><span class="lab-mark">MODELO 6/60</span></div>
+          <div class="lab-controls"><div class="field"><label for="trials-select">Repetições</label><select id="trials-select"><option value="1000">1.000 experimentos</option><option value="10000" selected>10.000 experimentos</option><option value="50000">50.000 experimentos</option></select></div><button id="simulate-btn" class="btn btn-primary" type="button">Executar simulação <span aria-hidden="true">↗</span></button><span id="sim-status" class="muted" role="status">Nenhuma simulação executada.</span></div>
+          <div class="simulation-chart" id="simulation-chart"><p class="empty">Execute a simulação para comparar o acaso com o modelo teórico.</p></div>
+          <p class="interpretation" id="simulation-detail">Em média, dois conjuntos aleatórios independentes de seis números em 60 têm 0,6 elementos em comum. Essa média não é uma previsão de sorteios.</p>
+        </section>
+
+        <section class="panel import-panel" id="dados" aria-labelledby="import-title">
+          <div class="panel-head"><div><span class="eyebrow">FONTE DOS DADOS</span><h2 id="import-title">Seu histórico. Sua análise.</h2><p>Carregue resultados para explorar seus próprios dados sem enviá-los para servidores.</p></div></div>
+          <div class="import-grid"><div class="upload-card"><div class="upload-symbol">⇧</div><h3>Importar arquivo</h3><p>CSV ou TXT com concurso, data e seis dezenas. Também aceita seis dezenas por linha.</p><label for="file-input" class="btn btn-primary">Selecionar arquivo</label><input type="file" id="file-input" accept=".csv,.txt,text/csv,text/plain" hidden><small>Formatos: .csv e .txt · até 5 MB</small></div><div class="paste-card"><label for="paste-input">Ou cole resultados aqui</label><textarea id="paste-input" rows="6" placeholder="concurso;data;bola1;bola2;bola3;bola4;bola5;bola6&#10;1;11/03/1996;04;05;30;33;41;52"></textarea><button type="button" id="paste-btn" class="btn btn-outline">Analisar texto <span aria-hidden="true">↗</span></button><div id="import-feedback" class="feedback" role="status" aria-live="polite"></div></div></div>
+          <div class="import-help"><strong>Como preparar o arquivo?</strong> Uma linha por concurso, com separação por ponto e vírgula, vírgula ou tabulação. Cabeçalho opcional. Registros inválidos são informados, não corrigidos silenciosamente.</div>
+        </section>
+
+        <section class="closing-banner"><div><span class="eyebrow">TRANSPARÊNCIA É UM DIFERENCIAL</span><h2>Entenda o acaso com clareza.</h2><p>Probabilidade, histórico e simulações reunidos em uma plataforma visual.</p></div><a class="btn btn-light" href="#laboratorio">Conhecer o laboratório <span aria-hidden="true">↗</span></a></section>
+        <footer><div class="footer-brand">✦ LOTERIA<span>LAB</span></div><p>Ferramenta independente e educacional. Não possui vínculo com a Caixa Econômica Federal.</p><p>Limitações: resultados anteriores não preveem sorteios; não há aumento demonstrado da chance de acertar ou de receber um prêmio individualmente. Sem apostas, apostas automáticas, pagamentos ou recomendações de números. Dados de demonstração são sintéticos. Importação XLSX e integração automática com fontes oficiais ainda não disponíveis.</p><small>© 2026 Loteria Lab · Estatística com responsabilidade.</small></footer>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
