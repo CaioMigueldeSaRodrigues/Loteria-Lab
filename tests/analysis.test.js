@@ -27,7 +27,7 @@ test("validação rejeita base parcial, duplicada, irregular ou não verificada"
   const {records,dataset}=fixture("quina");
   assert.throws(()=>validateArchive(dataset,records.slice(1),"quina"),/completo/);
   const corrupted=structuredClone(records);corrupted[1].contest=1;
-  assert.throws(()=>validateArchive(dataset,corrupted,"quina"),/Lacuna/);
+  assert.throws(()=>validateArchive(dataset,corrupted,"quina"),/lacuna/i);
   const repeated=structuredClone(records);repeated[0].numbers[1]=repeated[0].numbers[0];
   assert.throws(()=>validateArchive(dataset,repeated,"quina"),/Registro inválido/);
   dataset.verification_state="pending";
