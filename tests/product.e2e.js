@@ -70,3 +70,34 @@ test("mobile sem rolagem horizontal",async({page})=>{
   const x=await page.evaluate(()=>({width:document.documentElement.scrollWidth,screen:innerWidth}));
   expect(x.width).toBeLessThanOrEqual(x.screen+1);
 });
+
+test("visitor can request password recovery without displaying a password",async({page})=>{
+  await mockBackend(page);
+  let sent=false;
+  await page.route("**/auth/v1/recover?**",async route=>{
+    sent=true;
+    await route.fulfill({status:200,contentType:"application/json",body:"{}"});
+  });
+  await page.goto("/");
+  await page.getByRole("button",{name:"Esqueci minha senha"}).click();
+  await expect(page.locator("#recovery-request-form")).toBeVisible();
+  await page.locator("#recovery-email").fill("teste@example.invalid");
+  await page.getByRole("button",{name:"Enviar link de recuperação"}).click();
+  await expect(page.locator("#account-feedback")).toContainText("Se o e-mail estiver cadastrado");
+  expect(sent).toBeTruthy();
+});
+test("password recovery link opens secure change-password form",async({page})=>{
+  await mockBackend(page);
+  await page.route("**/auth/v1/user",async route=>{
+    if(route.request().method()==="PUT"){
+      await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify(user)});
+    }else await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify(user)});
+  });
+  await page.goto("/#access_token=recovery-token&type=recovery");
+  await expect(page.locator("#recovery-update-form")).toBeVisible();
+  await expect(page).not.toHaveURL(/access_token=/);
+  await page.locator("#recovery-new-password").fill("New-Password-1234");
+  await page.locator("#recovery-repeat-password").fill("New-Password-1234");
+  await page.getByRole("button",{name:"Salvar nova senha"}).click();
+  await expect(page.locator("#account-feedback")).toContainText("Senha redefinida com sucesso");
+});

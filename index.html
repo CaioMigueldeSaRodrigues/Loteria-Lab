@@ -92,6 +92,17 @@
     <label for="account-password">Senha<input id="account-password" type="password" name="password" autocomplete="current-password" minlength="8" required placeholder="Sua senha"></label>
     <button type="submit" class="button primary" id="sign-in-btn">Entrar</button>
     <button type="button" class="button secondary" id="sign-up-btn">Criar conta</button>
+    <button type="button" class="account-forgot" id="forgot-password-btn">Esqueci minha senha</button>
+  </form>
+  <form id="recovery-request-form" class="account-form" hidden>
+    <label for="recovery-email">E-mail da conta<input id="recovery-email" type="email" name="email" autocomplete="email" required placeholder="seu@email.com"></label>
+    <button class="button primary" type="submit" id="send-recovery-btn">Enviar link de recuperação</button>
+    <button class="button secondary" type="button" id="back-to-login-btn">Voltar ao login</button>
+  </form>
+  <form id="recovery-update-form" class="account-form" hidden>
+    <label for="recovery-new-password">Nova senha<input id="recovery-new-password" type="password" name="new-password" autocomplete="new-password" minlength="10" required placeholder="Mínimo de 10 caracteres"></label>
+    <label for="recovery-repeat-password">Confirmar nova senha<input id="recovery-repeat-password" type="password" name="confirm-password" autocomplete="new-password" minlength="10" required placeholder="Repita a nova senha"></label>
+    <button class="button primary" type="submit" id="save-recovery-btn">Salvar nova senha</button>
   </form>
   <div class="account-signed-in" id="account-signed-in" hidden>
     <span id="account-identity"></span><strong id="account-plan">Consultando acesso...</strong>

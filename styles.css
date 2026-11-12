@@ -49,3 +49,7 @@
 .dashboard-section .account-panel{margin:24px 0 0}
 .dashboard-section .access-guard{margin-top:16px;border-color:#5c694a;text-align:left;padding:14px 19px}
 @media(max-width:760px){.dashboard-section .analytics-shell{padding:13px}.dashboard-section-header{flex-direction:column;align-items:flex-start}.dashboard-section .analytics-panel{padding:14px}.dashboard-section-number{min-width:29px;height:29px}.teaser-content{align-items:flex-start}.teaser-content .button{width:100%}}
+
+.account-forgot{background:none;border:0;color:var(--green2);text-decoration:underline;text-underline-offset:3px;padding:9px;font-size:13px;font-weight:700;align-self:center}
+.account-forgot:hover{color:var(--yellow)}
+#recovery-request-form,#recovery-update-form{margin-top:18px;padding:15px;border:1px solid #397254;border-radius:12px;background:#0b2b20}

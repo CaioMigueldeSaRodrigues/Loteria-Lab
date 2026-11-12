@@ -6,6 +6,7 @@ const STORAGE_KEY="lotolab.auth.session.v1";
 const headers={"apikey":SUPABASE_PUBLIC_KEY,"Content-Type":"application/json"};
 let session=null;
 let refreshTask=null;
+let recoveryToken=null;
 
 export function activeEntitlement(row,now=Date.now()){
   if(!row||!["essential","advanced"].includes(row.plan)||row.access_status!=="active")return null;
@@ -66,6 +67,60 @@ export async function signUp(email,password){
   }
   return {signedIn:false,message:"Cadastro enviado. Confirme o endereço de e-mail para ativar a conta."};
 }
+
+function safeRedirectOrigin(origin){
+  const url=new URL(origin);
+  if(url.protocol!=="https:"&&!(url.protocol==="http:"&&["localhost","127.0.0.1"].includes(url.hostname)))throw Error("Origem de retorno inválida.");
+  return url.origin+"/";
+}
+// The token exchange happens in the browser after clicking the Supabase-generated email link.
+// No passwords or recovery tokens are included in an outgoing email or analytics event.
+export async function requestPasswordReset(email,origin){
+  const redirect=safeRedirectOrigin(origin);
+  await authCall("recover?redirect_to="+encodeURIComponent(redirect),{email});
+  return "Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.";
+}
+export function extractAuthRedirect(hash){
+  const params=new URLSearchParams(String(hash||"").replace(/^#/,""));
+  const type=params.get("type");
+  if(type==="recovery"&&params.get("access_token")){
+    return {type:"recovery",access_token:params.get("access_token")};
+  }
+  if(["signup","magiclink","invite"].includes(type)&&params.get("access_token")&&params.get("refresh_token")){
+    return {type:"login",access_token:params.get("access_token"),refresh_token:params.get("refresh_token"),
+      expires_in:Number(params.get("expires_in")||3600)};
+  }
+  if(params.has("error"))return {type:"error",message:params.get("error_description")||"Link inválido ou expirado."};
+  return {type:"none"};
+}
+export async function consumeAuthRedirect(hash){
+  const parsed=extractAuthRedirect(hash);
+  if(parsed.type==="recovery"){
+    recoveryToken=parsed.access_token;
+    // Check the recovery session against Auth before allowing password updates.
+    const user=await authCall("user",null,"GET",recoveryToken);
+    if(!user?.id){recoveryToken=null;throw Error("O link de recuperação expirou. Solicite outro.");}
+    return {type:"recovery"};
+  }
+  if(parsed.type==="login"){
+    saveTokens(parsed);
+    return {type:"login"};
+  }
+  return parsed;
+}
+export async function updateRecoveredPassword(password){
+  if(typeof password!=="string"||password.length<10)throw Error("Informe uma senha com pelo menos 10 caracteres.");
+  if(!recoveryToken)throw Error("Solicite um novo link de recuperação.");
+  const token=recoveryToken;
+  try {
+    await authCall("user",{password},"PUT",token);
+    return {success:true};
+  } finally {
+    recoveryToken=null;
+    clearSession();
+  }
+}
+
 export async function signOut(){
   const previous=session;
   clearSession();

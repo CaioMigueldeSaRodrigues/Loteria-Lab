@@ -1,5 +1,5 @@
 import {MODALITIES,validateArchive,analyze} from "./analysis.js";
-import {signIn,signUp,signOut,restoreSession,verifyUser,fetchEntitlement,getAccessToken,clearSession,sessionEmail,planAllows,fetchAdvancedComparison,SUPABASE_URL,SUPABASE_PUBLIC_KEY} from "./auth.js";
+import {signIn,signUp,signOut,restoreSession,verifyUser,fetchEntitlement,getAccessToken,clearSession,sessionEmail,planAllows,fetchAdvancedComparison,requestPasswordReset,consumeAuthRedirect,updateRecoveredPassword,SUPABASE_URL,SUPABASE_PUBLIC_KEY} from "./auth.js";
 
 // Publishable key: designed for browser access. RLS restricts the dataset to
 // verified public releases. Never use a service_role or secret key here.
@@ -11,6 +11,7 @@ const date=s=>s?new Date(s).toLocaleDateString("pt-BR",{timeZone:"UTC"}):"—";
 let code="megasena";
 let currentDataset=null,records=null,sequence=0;
 let entitlement=null;
+let recoveryMode="login";
 const hasBasic=()=>planAllows(entitlement?.plan,"basic");
 const hasAdvanced=()=>planAllows(entitlement?.plan,"advanced");
 const apiHeaders={"apikey":SUPABASE_PUBLIC_KEY,"Accept":"application/json"};
@@ -167,7 +168,9 @@ document.querySelectorAll("[data-modality]").forEach(button=>{
 });
 function authView(message){
   const signedIn=Boolean(sessionEmail());
-  el("account-form").hidden=signedIn;
+  el("account-form").hidden=signedIn||recoveryMode!=="login";
+  el("recovery-request-form").hidden=recoveryMode!=="request";
+  el("recovery-update-form").hidden=recoveryMode!=="update";
   el("account-signed-in").hidden=!signedIn;
   el("account-status").textContent=signedIn?(entitlement?"ASSINATURA ATIVA":"SEM ASSINATURA ATIVA"):"NÃO AUTENTICADO";
   el("account-identity").textContent=signedIn?sessionEmail():"";
@@ -238,7 +241,61 @@ el("advanced-compare").addEventListener("click",async()=>{
   }catch(error){el("advanced-result").textContent=error.message;}
   finally{btn.disabled=false;}
 });
-if(restoreSession())checkAccess();
-else authView("Entre ou crie uma conta. Nenhum plano é concedido automaticamente.");
+
+function showRecoveryRequest(){
+  recoveryMode="request";authView("Informe seu e-mail para receber um link temporário de recuperação.");
+  el("recovery-email").value=el("account-email").value;
+}
+function showLogin(message){
+  recoveryMode="login";authView(message);
+}
+el("forgot-password-btn").addEventListener("click",showRecoveryRequest);
+el("back-to-login-btn").addEventListener("click",()=>showLogin("Entre com seu e-mail e senha."));
+el("recovery-request-form").addEventListener("submit",async event=>{
+  event.preventDefault();
+  const button=el("send-recovery-btn");button.disabled=true;
+  try{
+    const email=el("recovery-email").value.trim();
+    const message=await requestPasswordReset(email,location.origin);
+    showLogin(message);
+  }catch(error){
+    el("account-feedback").textContent="Não foi possível solicitar a recuperação. Confira o endereço e tente novamente.";
+  }finally{button.disabled=false;}
+});
+el("recovery-update-form").addEventListener("submit",async event=>{
+  event.preventDefault();
+  const a=el("recovery-new-password").value;
+  const b=el("recovery-repeat-password").value;
+  if(a!==b){el("account-feedback").textContent="As senhas não coincidem.";return;}
+  const button=el("save-recovery-btn");button.disabled=true;
+  try{
+    await updateRecoveredPassword(a);
+    el("recovery-new-password").value="";
+    el("recovery-repeat-password").value="";
+    showLogin("Senha redefinida com sucesso. Entre usando a nova senha.");
+  }catch(error){el("account-feedback").textContent=error.message;}
+  finally{button.disabled=false;}
+});
+async function initializeAuth(){
+  const hasAuthFragment=location.hash.includes("access_token=")||location.hash.includes("error=");
+  if(hasAuthFragment){
+    const hash=location.hash;
+    history.replaceState(history.state,"",location.pathname+location.search);
+    try{
+      const result=await consumeAuthRedirect(hash);
+      if(result.type==="recovery"){
+        recoveryMode="update";
+        authView("Defina sua nova senha. O link de recuperação é de uso temporário.");
+        return;
+      }
+      if(result.type==="login"){await checkAccess();return;}
+      if(result.type==="error"){showLogin("Link inválido ou expirado. Solicite outro.");return;}
+    }catch{showLogin("Link de autenticação inválido ou expirado. Solicite um novo.");return;}
+  }
+  if(restoreSession())await checkAccess();
+  else authView("Entre ou crie uma conta. Nenhum plano é concedido automaticamente.");
+}
+
+initializeAuth();
 el("window-select").addEventListener("change",showStats);
 el("metric-select").addEventListener("change",showStats);
