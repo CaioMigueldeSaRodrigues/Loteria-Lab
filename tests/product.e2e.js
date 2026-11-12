@@ -1,67 +1,48 @@
 import {test,expect} from "@playwright/test";
-
-const example="concurso;data;bola1;bola2;bola3;bola4;bola5;bola6\n1;11/03/1996;04;05;30;33;41;52\n2;18/03/1996;10;11;12;13;14;15";
-
-test("primeira visita: benefícios e limitações claras",async({page},testInfo)=>{
-  const errors=[];
-  page.on("pageerror",e=>errors.push(e.message));
-  await page.goto("/");
-  await expect(page.getByRole("heading",{name:/Transforme números em conhecimento/i})).toBeVisible();
-  await expect(page.getByText("DADOS SIMULADOS")).toHaveCount(0);
-  await expect(page.locator("#kpi-draws")).toHaveText("—");
-  await expect(page.getByText(/não há aumento demonstrado da chance/i)).toBeVisible();
-  await page.screenshot({path:testInfo.outputPath("homepage-desktop.png"),fullPage:true});
-  expect(errors).toEqual([]);
+const dataset={id:"ba4e8a82-5cdf-4d13-94d5-44896d6ec401",modality_code:"megasena",
+ source_publisher:"Fonte de teste",source_reference:"fixture-local",
+ collected_at:"2026-10-05T10:00:00Z",verified_at:"2026-10-05T11:00:00Z",
+ published_at:"2026-10-05T12:00:00Z",verification_state:"verified",is_current:true,
+ first_contest:1,last_contest:2,record_count:2};
+const draws=[{contest:1,draw_date:"2026-10-01",numbers:[1,2,3,4,5,6]},
+ {contest:2,draw_date:"2026-10-02",numbers:[2,3,4,5,6,7]}];
+test.beforeEach(async({page})=>{
+  await page.route("**/rest/v1/lottery_datasets?**",async route=>route.fulfill({status:200,contentType:"application/json",body:"[]"}));
+  await page.route("**/rest/v1/lottery_draws?**",async route=>route.fulfill({status:200,contentType:"application/json",body:"[]"}));
 });
-
-test("demonstração é identificada e mapa contém 60 dezenas",async({page})=>{
+test("comercial real sem demonstrações, uploads ou cobrança falsa",async({page})=>{
   await page.goto("/");
-  await page.getByRole("button",{name:/Testar demonstração/i}).click();
-  await expect(page.locator("#source-tag")).toHaveText("DADOS SIMULADOS");
-  await expect(page.locator("#kpi-draws")).toHaveText("350");
-  await expect(page.locator("#number-grid .heat-cell")).toHaveCount(60);
-  await page.locator("#number-grid .heat-cell").first().click();
-  await expect(page.locator("#number-insight")).toContainText("Dezena 1:");
-  await page.locator("#window-select").selectOption("25");
-  await expect(page.locator("#number-grid .heat-cell")).toHaveCount(60);
+  await expect(page.getByRole("heading",{name:/DADOS REAIS/})).toBeVisible();
+  await expect(page.getByText("R$ 14,90")).toBeVisible();
+  await expect(page.getByText("R$ 29,90")).toBeVisible();
+  await expect(page.locator("#data-status")).toContainText("Não há histórico integral verificado");
+  await expect(page.locator("#number-grid .number-cell")).toHaveCount(0);
+  await expect(page.locator("input[type=file]")).toHaveCount(0);
+  await expect(page.getByText(/Nenhuma cobrança é efetuada/)).toBeVisible();
 });
-
-test("importação por texto aceita CSV e mostra métricas",async({page})=>{
+test("troca de modalidade não apresenta valores inventados",async({page})=>{
   await page.goto("/");
-  await page.locator("#paste-input").fill(example);
-  await page.locator("#paste-btn").click();
-  await expect(page.locator("#source-tag")).toHaveText("DADOS IMPORTADOS");
-  await expect(page.locator("#kpi-draws")).toHaveText("2");
-  await expect(page.locator("#kpi-latest")).toHaveText("2");
-  await expect(page.locator("#number-grid .heat-cell")).toHaveCount(60);
-  await expect(page.locator("#parity-chart .chart-col")).toHaveCount(7);
-  await expect(page.locator("#sum-chart .chart-col")).toHaveCount(7);
+  await page.getByRole("button",{name:"Lotofácil"}).click();
+  await expect(page.locator("#data-status")).toContainText("Lotofácil");
+  await expect(page.locator("#stat-contests")).toHaveText("—");
+  await expect(page.getByRole("button",{name:"Lotofácil"})).toHaveAttribute("aria-pressed","true");
 });
-
-test("importação por arquivo e rejeição de duplicatas",async({page})=>{
+test("apresenta métricas exclusivamente após receber conjunto íntegro verificado",async({page})=>{
+  await page.route("**/rest/v1/lottery_datasets?**",route=>route.fulfill({status:200,contentType:"application/json",body:JSON.stringify([dataset])}));
+  await page.route("**/rest/v1/lottery_draws?**",route=>route.fulfill({status:200,contentType:"application/json",body:JSON.stringify(draws)}));
   await page.goto("/");
-  const bad=example+"\n2;25/03/1996;01;02;03;04;05;06";
-  await page.locator("#file-input").setInputFiles({name:"historico.csv",mimeType:"text/csv",buffer:Buffer.from(bad)});
-  await expect(page.locator("#kpi-draws")).toHaveText("2");
-  await expect(page.locator("#import-feedback")).toContainText("1 linhas rejeitadas");
+  await expect(page.locator("#stat-contests")).toHaveText("2");
+  await expect(page.locator("#number-grid .number-cell")).toHaveCount(60);
+  await expect(page.locator("#parity-chart .bar-line")).toHaveCount(7);
+  await page.locator("#number-grid .number-cell").first().click();
+  await expect(page.locator("#number-insight")).toContainText("Dezena 01");
+  await page.locator("#window-select").selectOption("50");
+  await expect(page.locator("#stat-contests")).toHaveText("2");
 });
-
-test("simulação mostra sete resultados e média reproduzível",async({page})=>{
-  await page.goto("/");
-  await page.locator("#trials-select").selectOption("1000");
-  await page.locator("#simulate-btn").click();
-  await expect(page.locator("#simulation-chart .sim-row")).toHaveCount(7);
-  await expect(page.locator("#sim-status")).toContainText("1.000 experimentos");
-  await expect(page.locator("#simulation-detail")).toContainText("Média teórica: 0,600");
-});
-
-test("experiência móvel sem rolagem horizontal",async({page},testInfo)=>{
+test("mobile sem overflow horizontal",async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto("/");
-  await expect(page.getByRole("heading",{name:/Transforme números em conhecimento/i})).toBeVisible();
-  await page.getByRole("button",{name:/Testar demonstração/i}).click();
-  const widths=await page.evaluate(()=>({doc:document.documentElement.scrollWidth,viewport:window.innerWidth,overflow:[...document.querySelectorAll("*")].filter(e=>e.getBoundingClientRect().right>window.innerWidth+1).slice(0,12).map(e=>({tag:e.tagName,cl:e.className,right:Math.round(e.getBoundingClientRect().right)}))}));
-  console.log("Mobile viewport diagnostic:",JSON.stringify(widths));
-  expect(widths.doc).toBeLessThanOrEqual(widths.viewport+1);
-  await page.screenshot({path:testInfo.outputPath("homepage-mobile.png"),fullPage:true});
+  await expect(page.getByRole("heading",{name:/DADOS REAIS/})).toBeVisible();
+  const widths=await page.evaluate(()=>({doc:document.documentElement.scrollWidth,screen:innerWidth}));
+  expect(widths.doc).toBeLessThanOrEqual(widths.screen+1);
 });

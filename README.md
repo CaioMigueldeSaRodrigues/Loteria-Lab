@@ -1,55 +1,52 @@
-# Loteria Lab
+# LOTOLAB
 
-Laboratório educacional de análise estatística de resultados da Mega-Sena. **Não é uma ferramenta de apostas ou previsão de resultados.**
+Site comercial de **inteligência estatística histórica**. Repositório GitHub integrado à Vercel; `main` é produção e `feat/mvp-educacional` é desenvolvimento.
 
-## Produto
+## Escopo real publicado
 
-- Painel responsivo de exploração de histórico
-- Importação de CSV/TXT no navegador, sem upload para servidores
-- Mapa de frequências de 01 a 60
-- Distribuições de pares e faixas de soma
-- Simulação reprodutível do modelo uniforme 6/60
-- Demonstração com 350 registros **sintéticos**, sempre identificados
+- Layout comercial responsivo e ofertas semanais **planejadas**: Essencial R$ 14,90 e Avançado R$ 29,90.
+- Dashboard que consulta exclusivamente conjuntos **publicados e verificados** do Supabase, com três modalidades: Mega-Sena, Quina e Lotofácil.
+- Comparação por janelas, frequências, intervalos históricos e paridade.
+- Nenhum dado sintético, CSV enviado pelo usuário ou resultado parcial é exposto no site.
+- O cliente não consegue contratar ainda: autenticação, pagamento e controle de acesso não estão implementados.
+- Sem recomendação de combinações para apostas.
 
-## Desenvolvimento
+## Fonte de dados
 
-Requisitos: Node.js 20+ e Python 3 para servidor local.
+Projeto Supabase: `Loteria-Lab`. Tabelas públicas protegidas por RLS:
+`lottery_modalities`, `lottery_datasets`, `lottery_draws`.
 
-```sh
+Somente registros marcados como verificados e publicados são legíveis pelo frontend. É obrigatório validar **todos** os concursos, suas datas e a proveniência antes de promover uma versão. Não modificar RLS para contornar ausência de dados.
+
+A chave `sb_publishable_` do frontend é pública por definição; **nunca** incluir `service_role` ou chave secreta no repositório ou navegador.
+
+Se ainda não existir um conjunto verificado, a interface sinaliza indisponibilidade. O banco inicial foi criado sem registros.
+
+## Instalação local
+
+Requer Node.js >=20.
+
+```bash
+npm install
 npm test
 npm run build
+npx playwright install chromium
+npm run test:e2e
 npm run dev
 ```
 
-Abra http://localhost:5173 no navegador. A versão de produção pode ser publicada em hospedagem estática a partir de `dist/`. Nenhuma dependência de terceiros é necessária.
+Acesse `http://127.0.0.1:5173`.
 
-## Formato de importação
+## Vercel
 
-CSV/TXT com cabeçalho opcional:
+`vercel.json` define `npm run build` e `dist`. A Vercel deve estar vinculada ao repositório e ter a branch `main` configurada como produção. A conclusão do build GitHub não comprova a publicação na Vercel; confirme no painel de Deployments.
 
-```csv
-concurso;data;bola1;bola2;bola3;bola4;bola5;bola6
-1;11/03/1996;04;05;30;33;41;52
-```
+## Pendências comerciais críticas
 
-Aceita também seis dezenas separadas por `;`, `,` ou tabulação em cada linha. Registros com dezenas duplicadas, fora do intervalo ou concursos duplicados são rejeitados. O importador não verifica a autenticidade da fonte.
+1. Importação e verificação independente dos históricos integrais por modalidade.
+2. Checkout real e recorrência semanal com webhook e validação de pagamentos.
+3. Autenticação e autorização dos planos; política de cancelamento, LGPD e suporte.
+4. Confirmação do regime tributário e condições comerciais.
+5. Revalidação de integração E2E com acervo completo e monitoramento de disponibilidade.
 
-## Limitações
-
-Não inclui base oficial embutida, importação XLSX, conexão com a Caixa, autenticação, assinatura ou pagamentos. Resultados passados não aumentam a probabilidade de acerto ou demonstram maior chance de ganhar sem dividir. Não há geração de apostas.
-
-## Estado
-
-MVP em revisão. Testes automatizados configurados em GitHub Actions. Executar validação no navegador antes de publicar.
-
-## Validação local no Windows (sem hospedagem)
-
-1. No GitHub, selecione a branch `feat/mvp-educacional`, clique em **Code → Download ZIP** e extraia o ZIP.
-2. Com Node.js 20+ instalado, dê dois cliques em `validar-local.cmd`.
-3. No navegador, abra `http://127.0.0.1:5173`.
-4. Siga o roteiro de `docs/VALIDACAO-LOCAL.md` para testar a experiência do produto.
-5. Para encerrar, feche a janela do servidor ou pressione `Ctrl+C`.
-
-Não é necessário instalar dependências para apenas abrir o site. Para os testes automatizados, execute `npm install`, `npx playwright install chromium` e `npm run check`.
-
-A Vercel Hobby pode servir como ambiente **pessoal, não comercial**, sujeito aos termos do provedor. Não há necessidade de uma conta de hospedagem para os testes locais.
+**Não anunciar funcionalidades indisponíveis como prontas nem ativar cobranças sem comprovação do serviço.**
