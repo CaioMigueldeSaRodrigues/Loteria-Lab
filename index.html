@@ -17,7 +17,7 @@
       <nav class="nav" aria-label="Navegação principal">
         <a href="#analises">Análises</a><a href="#metodologia">Metodologia</a><a href="#planos">Planos</a>
       </nav>
-      <a class="header-link" href="#analises">Explorar plataforma <span aria-hidden="true">↗</span></a>
+      <a class="header-link" href="#conta">Minha conta <span aria-hidden="true">↗</span></a>
     </div>
   </header>
   <main id="conteudo">
@@ -42,7 +42,23 @@
     </div></section>
     <section class="section container" id="analises" aria-labelledby="analises-titulo">
       <div class="section-intro"><span class="eyebrow">CENTRAL DE ANÁLISES</span><h2 id="analises-titulo">Seu painel estatístico.</h2><p>Selecione a modalidade e explore apenas registros publicados e verificados. Nenhuma base fictícia é utilizada.</p></div>
-      <div class="analytics-shell">
+      <div class="account-panel" id="conta" aria-labelledby="account-title">
+  <div class="account-heading"><div><span class="eyebrow">ÁREA DO ASSINANTE</span><h3 id="account-title">Acesso ao Lotolab</h3><p>Entre para consultar seus recursos de análise. As permissões são verificadas no servidor.</p></div><div class="account-state" id="account-status" role="status">Não autenticado</div></div>
+  <form id="account-form" class="account-form" autocomplete="on">
+    <label for="account-email">E-mail<input id="account-email" type="email" name="email" autocomplete="email" required placeholder="seu@email.com"></label>
+    <label for="account-password">Senha<input id="account-password" type="password" name="password" autocomplete="current-password" minlength="8" required placeholder="Sua senha"></label>
+    <button type="submit" class="button primary" id="sign-in-btn">Entrar</button>
+    <button type="button" class="button secondary" id="sign-up-btn">Criar conta</button>
+  </form>
+  <div class="account-signed-in" id="account-signed-in" hidden>
+    <span id="account-identity"></span><strong id="account-plan">Consultando acesso...</strong>
+    <button id="refresh-access-btn" type="button" class="button secondary">Atualizar meu acesso</button>
+    <button id="sign-out-btn" type="button" class="button secondary">Sair</button>
+  </div>
+  <p class="account-feedback" id="account-feedback" role="status" aria-live="polite">Cadastre-se ou entre com sua conta. O cadastro não concede automaticamente uma assinatura.</p>
+</div>
+<div class="access-guard" id="access-guard" role="status" aria-live="polite">Entre na sua conta para consultar os indicadores disponíveis no seu plano.</div>
+      <div class="analytics-shell" id="analytics-content" hidden>
         <div class="analytics-toolbar">
           <div class="modality-tabs" role="group" aria-label="Modalidade">
             <button type="button" class="modality active" data-modality="megasena" aria-pressed="true">Mega-Sena</button>
@@ -76,6 +92,11 @@
           <div class="panel-title"><div><h3>Distribuição de pares</h3><p>Quantidade de dezenas pares por concurso, em registros históricos verificados.</p></div></div>
           <div id="parity-chart" class="bars"><p class="no-data">Aguardando histórico verificado.</p></div>
         </div>
+        <div class="analytics-panel advanced-panel" id="advanced-panel" hidden>
+          <div class="panel-title"><div><span class="eyebrow">PLANO AVANÇADO</span><h3>Comparação entre períodos</h3><p>Média histórica da soma versus a média em uma janela recente, calculadas no banco.</p></div><button type="button" id="advanced-compare" class="button primary">Calcular comparação</button></div>
+          <label for="advanced-window">Janela de concursos <select id="advanced-window"><option value="50">Últimos 50</option><option value="100" selected>Últimos 100</option><option value="200">Últimos 200</option><option value="500">Últimos 500</option></select></label>
+          <div class="advanced-result" id="advanced-result" role="status" aria-live="polite">Selecione uma modalidade para executar a análise.</div>
+        </div>
         <div class="provenance"><div><strong>Rastreabilidade dos dados</strong><span id="source-details">Origem, data e versão serão mostradas após validação.</span></div><a href="#metodologia">Entenda a metodologia ↗</a></div>
       </div>
     </section>
@@ -84,15 +105,15 @@
       <div class="method-grid"><article><span>01</span><h3>Origem verificada</h3><p>Os resultados só entram nas análises públicas após checagem de integridade, sequência e proveniência.</p></article><article><span>02</span><h3>Comparação por período</h3><p>Escolha uma janela temporal e examine a distribuição das ocorrências, sem confundir passado com previsão.</p></article><article><span>03</span><h3>Transparência matemática</h3><p>Em sorteios independentes e justos, uma frequência histórica maior não aumenta a probabilidade futura de uma dezena.</p></article></div>
     </div></section>
     <section class="section container" id="planos" aria-labelledby="plans-title">
-      <div class="section-intro center"><span class="eyebrow">PLANOS DO LOTOLAB</span><h2 id="plans-title">Sua análise, no seu ritmo.</h2><p>Do panorama histórico às comparações detalhadas. Condições comerciais previstas; contratação ainda não habilitada.</p></div>
+      <div class="section-intro center"><span class="eyebrow">PLANOS DO LOTOLAB</span><h2 id="plans-title">Sua análise, no seu ritmo.</h2><p>Do panorama histórico às comparações detalhadas. Valores de referência para assinatura semanal. A contratação ainda não está habilitada.</p></div>
       <div class="pricing-grid">
-        <article class="price-card"><span class="plan-name">ESSENCIAL</span><h3>O histórico em suas mãos.</h3><div class="price"><strong>R$ 14,90</strong><span>/ semana</span></div><p>Análises fundamentais, com clareza e simplicidade.</p><ul><li>Três modalidades</li><li>Indicadores históricos</li><li>Filtros de período</li><li>Mapa de frequências</li><li>Distribuições básicas</li></ul><a class="button secondary wide" href="#situacao">Ver disponibilidade</a></article>
+        <article class="price-card"><span class="plan-name">ESSENCIAL</span><h3>O histórico em suas mãos.</h3><div class="price"><strong>R$ 14,90</strong><span>/ semana</span></div><p>Análises fundamentais, com clareza e simplicidade.</p><ul><li>Três modalidades</li><li>Indicadores históricos</li><li>Filtros de período</li><li>Mapa de frequências</li><li>Distribuições básicas</li></ul><a class="button secondary wide" href="#conta">Acessar minha conta</a></article>
         <article class="price-card featured"><span class="plan-name">AVANÇADO · MAIS RECURSOS</span><h3>Explore cada detalhe.</h3><div class="price"><strong>R$ 29,90</strong><span>/ semana</span></div><p>Recursos analíticos adicionais previstos para a assinatura.</p><ul><li>Tudo do Essencial</li><li>Comparações entre períodos</li><li>Indicadores de dispersão</li><li>Relatórios aprofundados</li><li>Análises de distribuição avançadas</li></ul><a class="button primary wide" href="#situacao">Ver disponibilidade</a></article>
       </div>
-      <p class="pricing-note">Valores de referência para assinatura semanal. Nenhuma cobrança é efetuada neste site enquanto o checkout não estiver habilitado.</p>
+      <p class="pricing-note">Valores de referência para assinatura semanal. O acesso depende de uma assinatura ativa, conferida no banco. O checkout ainda não está habilitado; nenhum pagamento é cobrado aqui.</p>
     </section>
     <section class="availability-section container" id="situacao"><div class="availability-box"><div><span class="eyebrow">TRANSPARÊNCIA OPERACIONAL</span><h2>Disponibilidade do serviço</h2><p id="availability-message">A contratação está em preparação. As estatísticas públicas dependem da publicação de históricos integralmente validados.</p></div><a class="button secondary" href="#analises">Consultar indicadores</a></div></section>
   </main>
-  <footer class="footer"><div class="container footer-inner"><div class="footer-head"><strong>LOTO<span>LAB</span></strong><span>Dados reais. Análises claras.</span></div><p>Lotolab é uma plataforma independente de inteligência estatística, sem vínculo com a CAIXA. Resultados anteriores não permitem prever sorteios; filtros e frequências não alteram probabilidades futuras. O serviço não recebe apostas nem recomenda combinações de números. Os planos ainda não estão disponíveis para contratação.</p><small>© 2026 Lotolab · Estatística com transparência.</small></div></footer>
+  <footer class="footer"><div class="container footer-inner"><div class="footer-head"><strong>LOTO<span>LAB</span></strong><span>Dados reais. Análises claras.</span></div><p>Lotolab é uma plataforma independente de inteligência estatística, sem vínculo com a CAIXA. Resultados anteriores não permitem prever sorteios; filtros e frequências não alteram probabilidades futuras. O serviço não recebe apostas nem recomenda combinações de números. A consulta dos recursos exige autenticação e permissão ativa; a contratação ainda não está disponível.</p><small>© 2026 Lotolab · Estatística com transparência.</small></div></footer>
 </body>
 </html>

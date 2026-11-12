@@ -1,20 +1,25 @@
 import {MODALITIES,validateArchive,analyze} from "./analysis.js";
+import {signIn,signUp,signOut,restoreSession,verifyUser,fetchEntitlement,getAccessToken,clearSession,sessionEmail,planAllows,fetchAdvancedComparison,SUPABASE_URL,SUPABASE_PUBLIC_KEY} from "./auth.js";
 
 // Publishable key: designed for browser access. RLS restricts the dataset to
 // verified public releases. Never use a service_role or secret key here.
-const SUPABASE_URL="https://yafgjhloxphtfrgmpwvd.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY="sb_publishable_-aPr6X1ml5KUSqlvzXYj2g_EPEcwUxl";
+
 const el=id=>document.getElementById(id);
 const integer=n=>new Intl.NumberFormat("pt-BR").format(n);
 const decimal=n=>new Intl.NumberFormat("pt-BR",{maximumFractionDigits:1}).format(n);
 const date=s=>s?new Date(s).toLocaleDateString("pt-BR",{timeZone:"UTC"}):"—";
 let code="megasena";
 let currentDataset=null,records=null,sequence=0;
-const apiHeaders={"apikey":SUPABASE_PUBLISHABLE_KEY,"Accept":"application/json"};
+let entitlement=null;
+const hasBasic=()=>planAllows(entitlement?.plan,"basic");
+const hasAdvanced=()=>planAllows(entitlement?.plan,"advanced");
+const apiHeaders={"apikey":SUPABASE_PUBLIC_KEY,"Accept":"application/json"};
 
 async function query(table,params){
   const url=SUPABASE_URL+"/rest/v1/"+table+"?"+params.toString();
-  const response=await fetch(url,{headers:apiHeaders,cache:"no-store"});
+  const token=await getAccessToken();
+  if(!token)throw Error("Sua sessão expirou. Entre novamente.");
+  const response=await fetch(url,{headers:{...apiHeaders,Authorization:"Bearer "+token},cache:"no-store"});
   if(!response.ok)throw Error("Consulta à base não disponível (HTTP "+response.status+").");
   const result=await response.json();
   if(!Array.isArray(result))throw Error("Resposta inválida da base de dados.");
@@ -103,9 +108,11 @@ function showStats(){
     row.append(name,track,value);chart.append(row);
   }
   el("number-insight").textContent="Explore a métrica por dezena. Uma variação histórica não implica vantagem em sorteios futuros.";
+  if(hasAdvanced())el("advanced-result").textContent="Para comparar períodos, execute a análise no servidor.";
 }
 async function load(modality){
   const request=++sequence;
+  if(!hasBasic()){clearDisplay();updateState("Entre na sua conta e tenha uma assinatura ativa para consultar esta modalidade.","issue");return;}
   records=null;currentDataset=null;clearDisplay();
   updateState("Consultando a base publicada de "+MODALITIES[modality].name+".");
   try{
@@ -137,7 +144,76 @@ document.querySelectorAll("[data-modality]").forEach(button=>{
     });
     el("window-select").value="all";
     el("metric-select").value="freq";
-    load(code);
+    function authView(message){
+  const signedIn=Boolean(sessionEmail());
+  el("account-form").hidden=signedIn;
+  el("account-signed-in").hidden=!signedIn;
+  el("account-status").textContent=signedIn?(entitlement?"ASSINATURA ATIVA":"SEM ASSINATURA ATIVA"):"NÃO AUTENTICADO";
+  el("account-identity").textContent=signedIn?sessionEmail():"";
+  el("account-plan").textContent=entitlement
+    ?(entitlement.plan==="advanced"?"Plano Avançado":"Plano Essencial")+" · até "+new Date(entitlement.valid_until).toLocaleDateString("pt-BR")
+    :"Nenhuma assinatura ativa vinculada à conta";
+  el("analytics-content").hidden=!hasBasic();
+  el("access-guard").hidden=hasBasic();
+  el("advanced-panel").hidden=!hasAdvanced();
+  el("account-feedback").textContent=message||(hasBasic()?"Sua assinatura está ativa. Explore as análises disponíveis.":"A consulta exige uma assinatura ativa. O checkout ainda não está disponível.");
+  if(!hasBasic()){records=null;currentDataset=null;sequence++;clearDisplay();}
+}
+async function checkAccess(){
+  el("account-feedback").textContent="Validando sessão e permissões...";
+  try{
+    const user=await verifyUser();
+    if(!user){entitlement=null;authView("Entre ou crie sua conta para consultar as assinaturas.");return;}
+    entitlement=await fetchEntitlement();
+    authView();
+    if(hasBasic())await load(code);
+  }catch(error){
+    entitlement=null;
+    authView("Não foi possível validar as permissões: "+error.message);
+  }
+}
+el("account-form").addEventListener("submit",async event=>{
+  event.preventDefault();
+  const email=el("account-email").value.trim(),password=el("account-password").value;
+  const button=el("sign-in-btn");button.disabled=true;
+  try{
+    await signIn(email,password);
+    el("account-password").value="";
+    await checkAccess();
+  }catch(error){el("account-feedback").textContent="Falha ao entrar: "+error.message;}
+  finally{button.disabled=false;}
+});
+el("sign-up-btn").addEventListener("click",async()=>{
+  const email=el("account-email").value.trim(),password=el("account-password").value;
+  if(!el("account-form").reportValidity())return;
+  const button=el("sign-up-btn");button.disabled=true;
+  try{
+    const result=await signUp(email,password);
+    el("account-password").value="";
+    if(result.signedIn)await checkAccess();
+    else el("account-feedback").textContent=result.message;
+  }catch(error){el("account-feedback").textContent="Falha no cadastro: "+error.message;}
+  finally{button.disabled=false;}
+});
+el("sign-out-btn").addEventListener("click",async()=>{
+  await signOut();entitlement=null;authView("Sessão encerrada.");
+});
+el("refresh-access-btn").addEventListener("click",checkAccess);
+el("advanced-compare").addEventListener("click",async()=>{
+  if(!hasAdvanced()||!records)return;
+  const btn=el("advanced-compare");btn.disabled=true;
+  el("advanced-result").textContent="Calculando comparação autorizada...";
+  try{
+    const result=await fetchAdvancedComparison(code,Number(el("advanced-window").value));
+    el("advanced-result").textContent=result.available
+      ? "Histórico completo ("+integer(result.historical_count)+" concursos): média "+decimal(result.historical_mean_sum)
+        +" · últimos "+integer(result.recent_count)+" concursos: média "+decimal(result.recent_mean_sum)+"."
+      :"Ainda não existe um histórico verificado para esta modalidade.";
+  }catch(error){el("advanced-result").textContent=error.message;}
+  finally{btn.disabled=false;}
+});
+if(restoreSession())checkAccess();
+else authView("Entre ou crie uma conta. Nenhum plano é concedido automaticamente.");
   });
 });
 el("window-select").addEventListener("change",showStats);
