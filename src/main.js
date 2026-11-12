@@ -144,7 +144,10 @@ document.querySelectorAll("[data-modality]").forEach(button=>{
     });
     el("window-select").value="all";
     el("metric-select").value="freq";
-    function authView(message){
+    load(code);
+  });
+});
+function authView(message){
   const signedIn=Boolean(sessionEmail());
   el("account-form").hidden=signedIn;
   el("account-signed-in").hidden=!signedIn;
@@ -214,8 +217,5 @@ el("advanced-compare").addEventListener("click",async()=>{
 });
 if(restoreSession())checkAccess();
 else authView("Entre ou crie uma conta. Nenhum plano é concedido automaticamente.");
-  });
-});
 el("window-select").addEventListener("change",showStats);
 el("metric-select").addEventListener("change",showStats);
-load(code);
