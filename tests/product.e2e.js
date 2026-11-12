@@ -30,7 +30,9 @@ test("visitante pode conhecer preços mas não acessar análises protegidas",asy
   await page.goto("/");
   await expect(page.getByText("R$ 14,90")).toBeVisible();
   await expect(page.getByText("R$ 29,90")).toBeVisible();
-  await expect(page.locator("#analytics-content")).toBeHidden();
+  await expect(page.locator("#analytics-content")).toBeVisible();
+  await expect(page.locator("#number-grid .number-cell-placeholder")).toHaveCount(60);
+  await expect(page.locator("#advanced-teaser")).toBeVisible();
   await expect(page.locator("input[type=file]")).toHaveCount(0);
 });
 test("conta sem assinatura ativa não recebe acesso",async({page})=>{
@@ -38,7 +40,8 @@ test("conta sem assinatura ativa não recebe acesso",async({page})=>{
   await page.goto("/");
   await login(page);
   await expect(page.locator("#account-plan")).toContainText("Nenhuma assinatura ativa");
-  await expect(page.locator("#analytics-content")).toBeHidden();
+  await expect(page.locator("#analytics-content")).toBeVisible();
+  await expect(page.locator("#number-grid .number-cell-placeholder")).toHaveCount(60);
 });
 test("plano Essencial recebe painel mas não comparação Avançada",async({page})=>{
   await mockBackend(page,"essential");
@@ -47,6 +50,7 @@ test("plano Essencial recebe painel mas não comparação Avançada",async({page
   await expect(page.locator("#analytics-content")).toBeVisible();
   await expect(page.locator("#stat-contests")).toHaveText("2");
   await expect(page.locator("#number-grid .number-cell")).toHaveCount(60);
+  await expect(page.locator("#number-grid .number-cell-placeholder")).toHaveCount(0);
   await expect(page.locator("#advanced-panel")).toBeHidden();
 });
 test("plano Avançado libera comparação calculada no banco",async({page})=>{
@@ -54,6 +58,7 @@ test("plano Avançado libera comparação calculada no banco",async({page})=>{
   await page.goto("/");
   await login(page);
   await expect(page.locator("#advanced-panel")).toBeVisible();
+  await expect(page.locator("#advanced-teaser")).toBeHidden();
   await page.getByRole("button",{name:"Calcular comparação"}).click();
   await expect(page.locator("#advanced-result")).toContainText("Histórico completo");
 });

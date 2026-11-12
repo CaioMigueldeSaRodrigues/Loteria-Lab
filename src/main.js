@@ -54,8 +54,26 @@ function clearDisplay(){
   for(const id of ["stat-contests","stat-average","stat-expected","stat-latest"])el(id).textContent="—";
   el("stat-period").textContent="Aguardando dados";
   el("stat-updated").textContent="Sem versão verificada";
-  el("number-grid").replaceChildren(Object.assign(document.createElement("p"),{className:"no-data",textContent:"Os indicadores ficam indisponíveis até a publicação do histórico verificado."}));
-  el("parity-chart").replaceChildren(Object.assign(document.createElement("p"),{className:"no-data",textContent:"Aguardando histórico verificado."}));
+  const preview=el("number-grid");
+  preview.replaceChildren();
+  // Number labels are the game's defined range, NOT invented contest results.
+  for(let n=1;n<=MODALITIES[code].max;n++){
+    const cell=document.createElement("span");
+    cell.className="number-cell number-cell-placeholder";
+    cell.setAttribute("aria-label","Dezena "+n+"; estatística indisponível");
+    const label=document.createElement("strong");label.textContent=String(n).padStart(2,"0");
+    const unavailable=document.createElement("small");unavailable.textContent="—";
+    cell.append(label,unavailable);preview.append(cell);
+  }
+  const chart=el("parity-chart");
+  chart.replaceChildren();
+  for(let i=0;i<=MODALITIES[code].size;i++){
+    const row=document.createElement("div");row.className="bar-line bar-line-placeholder";
+    const name=document.createElement("span");name.textContent=i+" pares";
+    const track=document.createElement("div");track.className="bar-track";
+    const dash=document.createElement("span");dash.textContent="—";dash.className="bar-value";
+    row.append(name,track,dash);chart.append(row);
+  }
   el("source-details").textContent="Origem, data e versão serão mostradas após validação.";
   el("number-insight").textContent="Selecione uma dezena para ver seu indicador.";
 }
@@ -112,7 +130,7 @@ function showStats(){
 }
 async function load(modality){
   const request=++sequence;
-  if(!hasBasic()){clearDisplay();updateState("Entre na sua conta e tenha uma assinatura ativa para consultar esta modalidade.","issue");return;}
+  if(!hasBasic()){clearDisplay();updateState("Painel de "+MODALITIES[modality].name+": acesso aos resultados reservado a assinantes ativos.","issue");return;}
   records=null;currentDataset=null;clearDisplay();
   updateState("Consultando a base publicada de "+MODALITIES[modality].name+".");
   try{
@@ -156,11 +174,16 @@ function authView(message){
   el("account-plan").textContent=entitlement
     ?(entitlement.plan==="advanced"?"Plano Avançado":"Plano Essencial")+" · até "+new Date(entitlement.valid_until).toLocaleDateString("pt-BR")
     :"Nenhuma assinatura ativa vinculada à conta";
-  el("analytics-content").hidden=!hasBasic();
+  // Always display the analytical layout; the database continues to enforce access.
+  el("analytics-content").hidden=false;
+  el("advanced-teaser").hidden=hasAdvanced();
   el("access-guard").hidden=hasBasic();
   el("advanced-panel").hidden=!hasAdvanced();
   el("account-feedback").textContent=message||(hasBasic()?"Sua assinatura está ativa. Explore as análises disponíveis.":"A consulta exige uma assinatura ativa. O checkout ainda não está disponível.");
-  if(!hasBasic()){records=null;currentDataset=null;sequence++;clearDisplay();}
+  if(!hasBasic()){
+    records=null;currentDataset=null;sequence++;clearDisplay();
+    updateState("Visualização da estrutura do painel. Entre com uma assinatura ativa para consultar os resultados reais de "+MODALITIES[code].name+".","issue");
+  }
 }
 async function checkAccess(){
   el("account-feedback").textContent="Validando sessão e permissões...";

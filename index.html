@@ -26,7 +26,7 @@
         <span class="eyebrow"><span class="eyebrow-dot"></span> INTELIGÊNCIA ESTATÍSTICA MULTIMODALIDADE</span>
         <h1 id="titulo-principal">DADOS REAIS.<br>ANÁLISES CLARAS.<br><em>DECISÕES INFORMADAS.</em></h1>
         <p class="hero-sub">Resultados históricos, filtros comparativos e indicadores estatísticos em uma experiência construída para quem valoriza informação.</p>
-        <div class="hero-actions"><a class="button primary" href="#analises">Explorar análises <span aria-hidden="true">↗</span></a><a class="button secondary" href="#planos">Conhecer os planos</a></div>
+        <div class="hero-actions"><a class="button primary" href="#analises">Ver painel <span aria-hidden="true">↗</span></a><a class="button secondary" href="#planos">Conhecer os planos</a></div>
         <div class="hero-points"><span>✓ Sem envio de arquivos</span><span>✓ Fonte identificada</span><span>✓ Métodos transparentes</span></div>
       </div>
       <div class="hero-art" aria-hidden="true">
@@ -40,10 +40,53 @@
       <div><span class="strip-icon">▥</span><div><strong>Filtros avançados</strong><small>Janelas, frequências e distribuições</small></div></div>
       <div><span class="strip-icon">◈</span><div><strong>Interpretação responsável</strong><small>Contexto matemático e limites claros</small></div></div>
     </div></section>
-    <section class="section container" id="analises" aria-labelledby="analises-titulo">
-      <div class="section-intro"><span class="eyebrow">CENTRAL DE ANÁLISES</span><h2 id="analises-titulo">Seu painel estatístico.</h2><p>Selecione a modalidade e explore apenas registros publicados e verificados. Nenhuma base fictícia é utilizada.</p></div>
+    <section class="section container dashboard-section" id="analises" aria-labelledby="analises-titulo">
+      <div class="section-intro"><span class="eyebrow">CENTRAL DE ANÁLISES</span><h2 id="analises-titulo">Painel de análise histórica.</h2><p>Uma área para cada análise, com acesso por assinatura. O layout está visível; os indicadores só são preenchidos por históricos reais e verificados.</p></div>
+      <div class="analytics-shell" id="analytics-content" data-view="visible">
+        <div class="analytics-toolbar">
+          <div class="modality-tabs" role="group" aria-label="Modalidade">
+            <button type="button" class="modality active" data-modality="megasena" aria-pressed="true">Mega-Sena</button>
+            <button type="button" class="modality" data-modality="quina" aria-pressed="false">Quina</button>
+            <button type="button" class="modality" data-modality="lotofacil" aria-pressed="false">Lotofácil</button>
+          </div>
+          <span class="source-state" id="source-state" role="status" aria-live="polite">ACESSO NECESSÁRIO</span>
+        </div>
+        <div class="data-status" id="data-status" role="status" aria-live="polite">Entre com uma assinatura ativa para carregar os dados históricos verificados.</div>
+        <div class="dashboard-section-header"><div><span class="dashboard-section-number">01</span><h3>Panorama do histórico</h3></div><p>Indicadores calculados diretamente sobre os concursos verificados.</p></div>
+        <div class="stats-grid">
+          <article class="stat-card"><span>Concursos verificados</span><strong id="stat-contests">—</strong><small id="stat-period">Aguardando dados</small></article>
+          <article class="stat-card"><span>Média de soma</span><strong id="stat-average">—</strong><small>Por resultado registrado</small></article>
+          <article class="stat-card"><span>Ocorrência esperada</span><strong id="stat-expected">—</strong><small>Por dezena no modelo uniforme</small></article>
+          <article class="stat-card"><span>Último concurso</span><strong id="stat-latest">—</strong><small id="stat-updated">Sem versão verificada</small></article>
+        </div>
+        <div class="analytics-panel">
+          <div class="panel-title"><div><span class="dashboard-section-number">02</span><h3>Mapa das dezenas</h3><p>Frequência, percentual e intervalo desde a última ocorrência, conforme o histórico disponível.</p></div>
+            <div class="filters">
+              <label for="window-select">Período
+                <select id="window-select"><option value="all">Histórico completo</option><option value="100">Últimos 100</option><option value="50">Últimos 50</option></select>
+              </label>
+              <label for="metric-select">Indicador
+                <select id="metric-select"><option value="freq">Ocorrências</option><option value="rate">Frequência (%)</option><option value="delay">Intervalo histórico</option></select>
+              </label>
+            </div>
+          </div>
+          <div id="number-grid" class="number-grid" aria-label="Mapa de dezenas"><p class="no-data">Os números e indicadores serão exibidos conforme o histórico disponível para o assinante.</p></div>
+          <p id="number-insight" class="number-insight" aria-live="polite">Selecione uma dezena para ver seu indicador.</p>
+        </div>
+        <div class="analytics-panel">
+          <div class="panel-title"><div><span class="dashboard-section-number">03</span><h3>Distribuições estatísticas</h3><p>Quantidade de dezenas pares por concurso. As barras aparecem somente após a verificação do histórico.</p></div></div>
+          <div id="parity-chart" class="bars"><p class="no-data">Aguardando histórico verificado.</p></div>
+        </div>
+        <div class="analytics-panel advanced-panel" id="advanced-panel" hidden>
+          <div class="panel-title"><div><span class="eyebrow">PLANO AVANÇADO</span><h3>Comparação entre períodos</h3><p>Média histórica da soma versus a média em uma janela recente, calculadas no banco.</p></div><button type="button" id="advanced-compare" class="button primary">Calcular comparação</button></div>
+          <label for="advanced-window">Janela de concursos <select id="advanced-window"><option value="50">Últimos 50</option><option value="100" selected>Últimos 100</option><option value="200">Últimos 200</option><option value="500">Últimos 500</option></select></label>
+          <div class="advanced-result" id="advanced-result" role="status" aria-live="polite">Selecione uma modalidade para executar a análise.</div>
+        </div>
+        <div class="analytics-panel advanced-teaser" id="advanced-teaser"><div class="panel-title"><div><span class="dashboard-section-number">04</span><h3>Comparação entre períodos</h3><p>Estudos comparativos e médias calculados no banco, exclusivos do plano Avançado.</p></div><span class="plan-preview">ACESSO AVANÇADO</span></div><div class="teaser-content"><span class="teaser-line"><i></i><i></i><i></i></span><p>Ao entrar com uma assinatura Avançada ativa, a análise será liberada. Nenhum resultado é estimado nesta visualização.</p><a class="button secondary" href="#conta">Verificar meu acesso</a></div></div>
+        <div class="provenance"><div><strong>Rastreabilidade dos dados</strong><span id="source-details">Origem, data e versão serão mostradas após validação.</span></div><a href="#metodologia">Entenda a metodologia ↗</a></div>
+      </div>
       <div class="account-panel" id="conta" aria-labelledby="account-title">
-  <div class="account-heading"><div><span class="eyebrow">ÁREA DO ASSINANTE</span><h3 id="account-title">Acesso ao Lotolab</h3><p>Entre para consultar seus recursos de análise. As permissões são verificadas no servidor.</p></div><div class="account-state" id="account-status" role="status">Não autenticado</div></div>
+  <div class="account-heading"><div><span class="eyebrow">ÁREA DO ASSINANTE</span><h3 id="account-title">Minha conta e assinatura</h3><p>Entre para consultar seus recursos de análise. As permissões são verificadas no servidor.</p></div><div class="account-state" id="account-status" role="status">Não autenticado</div></div>
   <form id="account-form" class="account-form" autocomplete="on">
     <label for="account-email">E-mail<input id="account-email" type="email" name="email" autocomplete="email" required placeholder="seu@email.com"></label>
     <label for="account-password">Senha<input id="account-password" type="password" name="password" autocomplete="current-password" minlength="8" required placeholder="Sua senha"></label>
@@ -58,47 +101,6 @@
   <p class="account-feedback" id="account-feedback" role="status" aria-live="polite">Cadastre-se ou entre com sua conta. O cadastro não concede automaticamente uma assinatura.</p>
 </div>
 <div class="access-guard" id="access-guard" role="status" aria-live="polite">Entre na sua conta para consultar os indicadores disponíveis no seu plano.</div>
-      <div class="analytics-shell" id="analytics-content" hidden>
-        <div class="analytics-toolbar">
-          <div class="modality-tabs" role="group" aria-label="Modalidade">
-            <button type="button" class="modality active" data-modality="megasena" aria-pressed="true">Mega-Sena</button>
-            <button type="button" class="modality" data-modality="quina" aria-pressed="false">Quina</button>
-            <button type="button" class="modality" data-modality="lotofacil" aria-pressed="false">Lotofácil</button>
-          </div>
-          <span class="source-state" id="source-state" role="status" aria-live="polite">Verificando base...</span>
-        </div>
-        <div class="data-status" id="data-status" role="status" aria-live="polite">Consultando o histórico verificado desta modalidade.</div>
-        <div class="stats-grid">
-          <article class="stat-card"><span>Concursos verificados</span><strong id="stat-contests">—</strong><small id="stat-period">Aguardando dados</small></article>
-          <article class="stat-card"><span>Média de soma</span><strong id="stat-average">—</strong><small>Por resultado registrado</small></article>
-          <article class="stat-card"><span>Ocorrência esperada</span><strong id="stat-expected">—</strong><small>Por dezena no modelo uniforme</small></article>
-          <article class="stat-card"><span>Último concurso</span><strong id="stat-latest">—</strong><small id="stat-updated">Sem versão verificada</small></article>
-        </div>
-        <div class="analytics-panel">
-          <div class="panel-title"><div><h3>Mapa das dezenas</h3><p>Frequência, percentual e intervalo desde a última ocorrência, conforme o histórico disponível.</p></div>
-            <div class="filters">
-              <label for="window-select">Período
-                <select id="window-select"><option value="all">Histórico completo</option><option value="100">Últimos 100</option><option value="50">Últimos 50</option></select>
-              </label>
-              <label for="metric-select">Indicador
-                <select id="metric-select"><option value="freq">Ocorrências</option><option value="rate">Frequência (%)</option><option value="delay">Intervalo histórico</option></select>
-              </label>
-            </div>
-          </div>
-          <div id="number-grid" class="number-grid" aria-label="Mapa de dezenas"><p class="no-data">Os indicadores aparecem quando houver uma base verificada.</p></div>
-          <p id="number-insight" class="number-insight" aria-live="polite">Selecione uma dezena para ver seu indicador.</p>
-        </div>
-        <div class="analytics-panel">
-          <div class="panel-title"><div><h3>Distribuição de pares</h3><p>Quantidade de dezenas pares por concurso, em registros históricos verificados.</p></div></div>
-          <div id="parity-chart" class="bars"><p class="no-data">Aguardando histórico verificado.</p></div>
-        </div>
-        <div class="analytics-panel advanced-panel" id="advanced-panel" hidden>
-          <div class="panel-title"><div><span class="eyebrow">PLANO AVANÇADO</span><h3>Comparação entre períodos</h3><p>Média histórica da soma versus a média em uma janela recente, calculadas no banco.</p></div><button type="button" id="advanced-compare" class="button primary">Calcular comparação</button></div>
-          <label for="advanced-window">Janela de concursos <select id="advanced-window"><option value="50">Últimos 50</option><option value="100" selected>Últimos 100</option><option value="200">Últimos 200</option><option value="500">Últimos 500</option></select></label>
-          <div class="advanced-result" id="advanced-result" role="status" aria-live="polite">Selecione uma modalidade para executar a análise.</div>
-        </div>
-        <div class="provenance"><div><strong>Rastreabilidade dos dados</strong><span id="source-details">Origem, data e versão serão mostradas após validação.</span></div><a href="#metodologia">Entenda a metodologia ↗</a></div>
-      </div>
     </section>
     <section class="section methodology-section" id="metodologia" aria-labelledby="method-title"><div class="container">
       <div class="section-intro"><span class="eyebrow">METODOLOGIA</span><h2 id="method-title">Contexto para cada número.</h2><p>Indicadores úteis começam com dados auditáveis e interpretação correta.</p></div>
